@@ -1,11 +1,18 @@
 
 all:
 	javac *.java
+	javac test/*.java
 
 run:
-	java -ea DsvIniDisplay
+	java DsvIniDisplay
+
+test:
+	java -cp .:test -ea PrinterTest
+	java -cp .:test -ea ParserTest
+	java -cp .:test -ea DsvIniDisplayTest
 
 clean:
 	rm *.class
+	rm test/*.class
 
-.PHONY: all clean
+.PHONY: all run test clean
