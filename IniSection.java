@@ -8,13 +8,19 @@ class IniSection {
 String name;
 List<Property> properties = new ArrayList<Property>();
 
-boolean equals(IniSection other) {
+public boolean equals(Object objOther) {
+	// Please unit test this.
+	if (!(objOther instanceof IniSection)) return false;
+	IniSection other = (IniSection)objOther;
+
 	if (!(Objects.equals(this.name, other.name))) return false;
 	if (this.properties.size() != other.properties.size()) return false;
 	for (int o = 0; o < this.properties.size(); ++o) {
-		if (this.properties.get(o) != other.properties.get(o)) {
+		if (!Objects.equals(this.properties.get(o), 
+				other.properties.get(o))) {
 			return false;
 		}
+		// Not sure how to format the above..
 	}
 	return true;
 }

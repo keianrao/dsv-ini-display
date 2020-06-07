@@ -51,8 +51,6 @@ public IniSection next() {
 //  Helpers \\  //  \\  //  \\  //  \\  //  \\
 
 static IniSection toIniSection(String[] dsvValues, Schema schema) {
-	// Please unit test this.
-
 	IniSection iniSection = new IniSection();
 
 	for (int o = 0; o < dsvValues.length; ++o) {
