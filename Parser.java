@@ -6,10 +6,14 @@ import java.io.IOException;
 
 class Parser {
 
+//  Members \\  //  \\  //  \\  //  \\  //  \\
+
 private Schema schema;
 private BufferedReader reader;
 
-//  \\  //  \\  //  \\  //  \\  //  \\  //  \\
+
+
+//  Constructors    \\  //  \\  //  \\  //  \\
 
 Parser(Schema schema, InputStream stream) 
 throws IllegalArgumentException, IOException {
@@ -23,12 +27,14 @@ throws IllegalArgumentException, IOException {
 static boolean schemaIsValid(Schema schema) {
 	if (schema == null) return false;
 	if (schema.keys == null) return false;
-	if (schema.primaryKeyIndex < 0) return false;
-	if (schema.primaryKeyIndex < schema.keys.length) return false;
+	if (schema.primaryKeyOffset < 0) return false;
+	if (schema.primaryKeyOffset >= schema.keys.length) return false;
 	return true;
 }
 
-//  \\  //  \\  //  \\  //  \\  //  \\  //  \\
+
+
+//  Interface   //  \\  //  \\  //  \\  //  \\
 
 public boolean hasNext() {
 	// Please unit test this.
@@ -40,28 +46,30 @@ public IniSection next() {
 	return null;
 }
 
-//  \\  //  \\  //  \\  //  \\  //  \\  //  \\
+
+
+//  Helpers \\  //  \\  //  \\  //  \\  //  \\
 
 static IniSection toIniSection(DsvRecord dsvRecord, Schema schema) {
 	// Please unit test this.
 
 	IniSection iniSection = new IniSection();
 
-	for (int i = 0; i < schema.keys.length; ++i) {
-		if (i == schema.primaryKeyIndex) {
-			iniSection.name = dsvRecord.values[i];
+	for (int o = 0; o < schema.keys.length; ++o) {
+		if (o == schema.primaryKeyOffset) {
+			iniSection.name = dsvRecord.values[o];
 		}
 		else {
-			iniSection.properties.put(schema.keys[i], dsvRecord.values[i]);
+			Property newProperty = new Property();
+			newProperty.key = schema.keys[o];
+			newProperty.value = dsvRecord.values[o];
+			iniSection.properties.add(newProperty);
 		}
 	}
-	/*
-	Normally I would use 'o' for 'offset' here, but because I 
-	called the variable "primaryKeyIndex", I'll use zero-indexing.
-	*/
 
 	return iniSection;
 }
+
 
 static final String LOOK_BEHIND_BACKSLASH_ESCAPE = "(?<!\\\\)";
 static final String DELIMITER = ":";

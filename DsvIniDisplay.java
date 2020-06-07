@@ -3,6 +3,8 @@ import java.io.IOException;
 
 class DsvIniDisplay {
 
+//  Main    \\  //  \\  //  \\  //  \\  //  \\
+
 public static void main(String... args) {
 	Schema schema = parseSchema(args);
 	assert Parser.schemaIsValid(schema);
@@ -17,8 +19,6 @@ public static void main(String... args) {
 		System.exit(1);
 	}
 }
-
-//  \\  //  \\  //  \\  //  \\  //  \\  //  \\
 
 static Schema parseSchema(String... args) {
 	// Please unit test this.

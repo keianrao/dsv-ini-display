@@ -1,7 +1,5 @@
-
+ 
 class Schema {
-
-String[] keys;
-int primaryKeyIndex;
-
+	String[] keys;
+	int primaryKeyOffset;
 }
