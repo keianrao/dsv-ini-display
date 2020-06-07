@@ -50,20 +50,18 @@ public IniSection next() {
 
 //  Helpers \\  //  \\  //  \\  //  \\  //  \\
 
-static IniSection toIniSection(DsvRecord dsvRecord, Schema schema) {
+static IniSection toIniSection(String[] dsvValues, Schema schema) {
 	// Please unit test this.
 
 	IniSection iniSection = new IniSection();
 
-	for (int o = 0; o < schema.keys.length; ++o) {
+	for (int o = 0; o < dsvValues.length; ++o) {
 		if (o == schema.primaryKeyOffset) {
-			iniSection.name = dsvRecord.values[o];
+			iniSection.name = dsvValues[o];
 		}
 		else {
-			Property newProperty = new Property();
-			newProperty.key = schema.keys[o];
-			newProperty.value = dsvRecord.values[o];
-			iniSection.properties.add(newProperty);
+			iniSection.properties
+				.add(new Property(schema.keys[o], dsvValues[o]));
 		}
 	}
 
@@ -76,8 +74,13 @@ static final String DELIMITER = ":";
 static final String SPLITTER_REGEX = LOOK_BEHIND_BACKSLASH_ESCAPE + DELIMITER;
 
 static String[] splitDSVString(String string) {
-	// Please unit test this.
 	return string.split(SPLITTER_REGEX);
+	/*
+	* Interesting behaviour about java.lang.String#split here:
+	* If the string ends in the delimiter but there's no characters past it, 
+	* there won't be a trailing field. So 'string:' -> length == 1.
+	* The Javadoc mentions this, but *very* briefly..
+	*/
 }
 
 }

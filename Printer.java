@@ -1,6 +1,4 @@
 
-import java.util.Map;
-
 class Printer {
 
 static String toString(IniSection section) {
@@ -12,10 +10,10 @@ static String toString(IniSection section) {
 	builder.append("["); builder.append(section.name); builder.append("]\n");
 
 	// Properties..
-	for (Map.Entry<String, String> property: section.properties.entrySet()) {
-		builder.append(property.getKey()); 
+	for (Property property: section.properties) {
+		builder.append(property.key); 
 		builder.append("=");
-		builder.append(property.getValue());
+		builder.append(property.value);
 		builder.append("\n");
 	}
 
