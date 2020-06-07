@@ -36,30 +36,38 @@ static boolean schemaIsValid(Schema schema) {
 
 //  Interface   //  \\  //  \\  //  \\  //  \\
 
-public boolean hasNext() {
-	// Please unit test this.
-	return false;
-}
-
 public IniSection next() {
-	// Please unit test this.
-	return null;
+	// Please unit test this.	
+	String string;
+	try {
+		string = reader.readLine();
+	}
+	catch (IOException eIo) {
+		return null;
+	}
+	if (string == null) {
+		return null;
+	}
+
+	String[] values = splitDSVString(string);
+	IniSection section = toIniSection(values, schema);
+	return section;
 }
 
 
 
 //  Helpers \\  //  \\  //  \\  //  \\  //  \\
 
-static IniSection toIniSection(String[] dsvValues, Schema schema) {
+static IniSection toIniSection(String[] values, Schema schema) {
 	IniSection iniSection = new IniSection();
 
-	for (int o = 0; o < dsvValues.length; ++o) {
+	for (int o = 0; o < values.length; ++o) {
 		if (o == schema.primaryKeyOffset) {
-			iniSection.name = dsvValues[o];
+			iniSection.name = values[o];
 		}
 		else {
 			iniSection.properties
-				.add(new Property(schema.keys[o], dsvValues[o]));
+				.add(new Property(schema.keys[o], values[o]));
 		}
 	}
 
