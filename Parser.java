@@ -8,85 +8,98 @@ class Parser {
 
 //  Members \\  //  \\  //  \\  //  \\  //  \\
 
-private Schema schema;
 private BufferedReader reader;
 
 
 
 //  Constructors    \\  //  \\  //  \\  //  \\
 
-Parser(Schema schema, InputStream stream) 
-throws IllegalArgumentException, IOException {
-	if (!schemaIsValid(schema)) {
-		throw new IllegalArgumentException("Schema is invalid!");
-	}
-	this.schema = schema;
+Parser(InputStream stream) throws IllegalArgumentException, IOException {
 	this.reader = new BufferedReader(new InputStreamReader(stream));
-}
-
-static boolean schemaIsValid(Schema schema) {
-	if (schema == null) return false;
-	if (schema.keys == null) return false;
-	if (schema.primaryKeyOffset < 0) return false;
-	if (schema.primaryKeyOffset >= schema.keys.length) return false;
-	return true;
+	// Should we just switch to completely static functions?
 }
 
 
 
 //  Interface   //  \\  //  \\  //  \\  //  \\
 
-public IniSection next() {
+public Models.IniSection next(String[] keys, int sectionNameKeyOffset) throws IOException {
 	// Please unit test this.	
-	String string;
-	try {
-		string = reader.readLine();
+	if (sectionNameKeyOffset < 0 || sectionNameKeyOffset >= keys.length) {
+		throw new IllegalArgumentException(
+			"Section name key offset has to be " +
+			"a valid offset inside the keys array!"
+		);
 	}
-	catch (IOException eIo) {
-		return null;
+	
+	while (true) {
+		String line = reader.readLine();
+		
+		if (line == null) {
+			return null;
+		}
+		
+		if (line.startsWith("//") || line.startsWith("#")) {
+			continue;
+		}		
+		if (line.trim().isEmpty()) {
+			continue;
+		}
+		
+		String[] values = splitDSVString(line);		
+		if (values.length != keys.length) {
+			// "Invalid line" - ignore it
+			// Spec actually says we should log this somewhere.
+			// Where should we?
+			continue;
+		}
+		
+		return toIniSection(values, keys, sectionNameKeyOffset);
 	}
-	if (string == null) {
-		return null;
-	}
-
-	String[] values = splitDSVString(string);
-	IniSection section = toIniSection(values, schema);
-	return section;
 }
 
 
 
-//  Helpers \\  //  \\  //  \\  //  \\  //  \\
+public static String[] splitDSVString(String string) {
+	final String LOOK_BEHIND_BACKSLASH_ESCAPE = "(?<!\\\\)";
+	final String DELIMITER = ":";
+	final String SPLITTER_REGEX = LOOK_BEHIND_BACKSLASH_ESCAPE + DELIMITER;
 
-static IniSection toIniSection(String[] values, Schema schema) {
-	IniSection iniSection = new IniSection();
+	return string.split(SPLITTER_REGEX);
+	/*
+	* Interesting behaviour about java.lang.String#split here:
+	* If the string ends in the delimiter but there are 
+	* no characters past it, there won't be a trailing field. 
+	* So 'string:' -> length == 1.
+	* The Javadoc mentions this, but only very briefly..
+	*/
+}
 
-	for (int o = 0; o < values.length; ++o) {
-		if (o == schema.primaryKeyOffset) {
+
+
+//  Helper functions    //  \\  //  \\  //  \\
+
+public static Models.IniSection toIniSection(
+		String[] values,
+		String[] keys, int sectionNameKeyOffset) 
+{
+	// This function is public only for testability.
+	// Surely that is incorrect..?
+	assert values != null; assert keys != null;
+	
+	Models.IniSection iniSection = new Models.IniSection();
+
+	for (int o = 0; o < Math.min(values.length, keys.length); ++o) {
+		if (o == sectionNameKeyOffset) {
 			iniSection.name = values[o];
 		}
 		else {
-			iniSection.properties
-				.add(new Property(schema.keys[o], values[o]));
+			Models.Property p = new Models.Property(keys[o], values[o]);
+			iniSection.properties.add(p);
 		}
 	}
 
 	return iniSection;
-}
-
-
-static final String LOOK_BEHIND_BACKSLASH_ESCAPE = "(?<!\\\\)";
-static final String DELIMITER = ":";
-static final String SPLITTER_REGEX = LOOK_BEHIND_BACKSLASH_ESCAPE + DELIMITER;
-
-static String[] splitDSVString(String string) {
-	return string.split(SPLITTER_REGEX);
-	/*
-	* Interesting behaviour about java.lang.String#split here:
-	* If the string ends in the delimiter but there's no characters past it, 
-	* there won't be a trailing field. So 'string:' -> length == 1.
-	* The Javadoc mentions this, but *very* briefly..
-	*/
 }
 
 }

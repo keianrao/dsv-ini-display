@@ -1,16 +1,18 @@
 
 class Printer {
 
-static String toString(IniSection section) {
+static String toString(Models.IniSection section) {
 	// Please unit test this.
 
 	StringBuilder builder = new StringBuilder();
 
 	// Header..
-	builder.append("["); builder.append(section.name); builder.append("]\n");
+	builder.append("[");
+	builder.append(section.name);
+	builder.append("]\n");
 
 	// Properties..
-	for (Property property: section.properties) {
+	for (Models.Property property: section.properties) {
 		builder.append(property.key); 
 		builder.append("=");
 		builder.append(property.value);

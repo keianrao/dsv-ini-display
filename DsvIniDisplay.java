@@ -12,44 +12,34 @@ public static void main(String... args) {
 		System.exit(1);
 	}
 
-	Schema schema = parseSchema(args);
-	if (!Parser.schemaIsValid(schema)) {
-		System.err.println("Sorry, one of the arguments given was invalid..");
+	boolean error = false;
+	String[] keys = Parser.splitDSVString(args[0]);
+	int sectionNameKeyOffset = -1;
+	try {
+		sectionNameKeyOffset = Integer.parseInt(args[1]) - 1;
+	}
+	catch (NumberFormatException eNf) { error = true; }
+	
+	
+	if (error) {
+		System.err.println("Sorry, one of the arguments was invalid..");
+		// Not exactly a good error message..
 		System.exit(1);
 	}
-
-	try {
-		Parser parser = new Parser(schema, System.in);
+	else try {
+		Parser parser = new Parser(System.in);
 
 		while (true) {
-			IniSection next = parser.next();
-			if (next != null) {
-				System.out.println(Printer.toString(next));
-			}
-			else {
-				break;
-			}
+			Models.IniSection anotherSection = 
+				parser.next(keys, sectionNameKeyOffset);
+			if (anotherSection == null) break;			
+			System.out.println(Printer.toString(anotherSection));
 		}
 	}
 	catch (IOException eIo) {
 		eIo.printStackTrace();
-		System.exit(1);
+		System.exit(2);
 	}
-}
-
-static Schema parseSchema(String... args) {
-	// Please unit test this.
-
-	Schema schema = new Schema();
-	schema.keys = Parser.splitDSVString(args[0]);
-
-	schema.primaryKeyOffset = -1; 
-	try {
-		schema.primaryKeyOffset = Integer.parseInt(args[1]) - 1;
-	}
-	catch (NumberFormatException eNf) { }
-
-	return schema;
 }
 
 static void printHelp(PrintStream out) {

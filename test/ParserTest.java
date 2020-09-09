@@ -39,20 +39,18 @@ void testSplitDSVString() {
 
 void testToIniSection() {
 	// Let's go with a schema for Malaysian states.
-	Schema schema = new Schema();
-	schema.keys = new String[] { "Name", "Civil Capital", "Royal Capital" };
-	schema.primaryKeyOffset = 0;
-	assert Parser.schemaIsValid(schema);
-	// Is it valid for us to use this?
-	// i.e. is it part of the public interface?
-
-	String perlisString = "Perlis Indera Kayangan:Kangar:Arau";
-	String sabahString = "Sabah:Kota Kinabalu:";
-	String[] perlisValues = Parser.splitDSVString(perlisString);
-	String[] sabahValues = Parser.splitDSVString(sabahString);
+	String[] keys = 
+		new String[] { "Name", "Civil Capital", "Royal Capital" };
+	int sectionNameKeyOffset = 0;
+	
+	String perlisLine = "Perlis Indera Kayangan:Kangar:Arau";
+	String sabahLine = "Sabah:Kota Kinabalu:";
+	String[] perlisValues = Parser.splitDSVString(perlisLine);
+	String[] sabahValues = Parser.splitDSVString(sabahLine);
 
 	// Perlis first, since it's the normal case.
-	IniSection perlis = Parser.toIniSection(perlisValues, schema);
+	Models.IniSection perlis = 
+		Parser.toIniSection(perlisValues, keys, sectionNameKeyOffset);
 	assert perlis.name.equals("Perlis Indera Kayangan");
 	assert perlis.properties.size() == 2;
 	assert perlis.properties.get(0).key.equals("Civil Capital");
@@ -60,7 +58,8 @@ void testToIniSection() {
 	assert perlis.properties.get(1).key.equals("Royal Capital");
 	assert perlis.properties.get(1).value.equals("Arau");
 
-	IniSection sabah = Parser.toIniSection(sabahValues, schema);
+	Models.IniSection sabah = 
+		Parser.toIniSection(sabahValues, keys, sectionNameKeyOffset);
 	assert sabah.name.equals("Sabah"); 
 	assert sabah.properties.size() == 1;
 	assert sabah.properties.get(0).key.equals("Civil Capital");
