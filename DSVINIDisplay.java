@@ -18,7 +18,7 @@
 
 
 import java.util.Map;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.io.Reader;
@@ -55,6 +55,10 @@ public static List<INISection> fullyTranslate(
 	// a normal Reader to handle newline escapes. Though, an application
 	// using INI is probably not going to need such sophistication..
 	
+	if (reader == null)
+		throw new IllegalArgumentException
+			("Cannot translate data from null reader!");
+	
 	List<INISection> sections = new ArrayList<>();
 	
 	String line;
@@ -67,21 +71,39 @@ public static List<INISection> fullyTranslate(
 
 public static List<INISection> fullyTranslate(
 		Reader reader, DSVtoINIMapping mapping) throws IOException {
+	// Apparently new BufferedReader(null) will not except? Odd.
+	if (reader == null)
+		throw new IllegalArgumentException
+			("Cannot translate data from null reader!");
+	
 	return fullyTranslate(new BufferedReader(reader), mapping);
 }
 
 public static List<INISection> fullyTranslate(
 		InputStream inputStream, DSVtoINIMapping mapping) throws IOException {
+	// Same here, apparently;
+	if (inputStream == null)
+		throw new IllegalArgumentException
+			("Cannot translate data from null input stream!");
+		
 	return fullyTranslate(new InputStreamReader(inputStream), mapping);
 }
 
 public static List<INISection> fullyTranslate(
 		File file, DSVtoINIMapping mapping) throws IOException {
+	if (file == null)
+		throw new IllegalArgumentException
+			("Cannot read and translate null file!");
+		
 	return fullyTranslate(new FileReader(file), mapping);
 }
 
 public static List<INISection> fullyTranslate(
 		String filepath, DSVtoINIMapping mapping) throws IOException {
+	if (filepath == null)
+		throw new IllegalArgumentException
+			("Can't read and translate file at null filepath!");
+			
 	return fullyTranslate(new File(filepath), mapping);
 }
 
@@ -111,7 +133,7 @@ public static INISection translate(String dsv, DSVtoINIMapping mapping) {
 		mapping.sectionNameKey = mapping.keys[0];
 	
 	INISection iniSection = new INISection();
-	iniSection.pairs = new HashMap<>();
+	iniSection.pairs = new LinkedHashMap<>();
 	
 	for (int o = 0; o < dsvFields.length; ++o) {
 		String key = mapping.keys[o];
@@ -131,6 +153,14 @@ public static INISection translate(String dsv, DSVtoINIMapping mapping) {
 
 
 public static String toString(INISection iniSection) {
+	if (iniSection == null)
+		throw new IllegalArgumentException
+			("Cannot print null section!");
+			
+	if (iniSection.pairs == null)
+		throw new IllegalArgumentException
+			("Invalid INI section - pairs are null!");
+
 	StringBuilder builder = new StringBuilder();
 	builder.append("[");
 	builder.append(iniSection.name);
